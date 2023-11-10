@@ -64,12 +64,27 @@ function login(){
     .then(res => res.json())
     .then(data => {
         if (data.sucsess) {
-            load_task()
+            window.location.href = '/'
         }else{
             ("could not logg in error")
             alert(data.message);
         }
     })
+}
+
+
+function message(){
+    fetch('/send_message',{
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ message: message})
+    })
+    .then(res => res.json())
+    .then(data => {
+
+    });
 }
 
 function deletetask(index){

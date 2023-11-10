@@ -1,44 +1,71 @@
 
 const express = require('express');
-const session = require('express-session')
+const sessions = require('express-session')
 const path = require('path');
+
  
 const app = express();
 const PORT = 80
 var tasks = []
 
 var username = "Per"
+var session;
 
 var users = [
     {username: "Per", password: "123"},
-    {}
+    {username: "man", password: "1234"},
 ]
 
  
 app.use(express.static('public')) // tilordner public mappe til vår app
 app.use(express.json()) // tar i bruk json funksjon for app
 
-app.use(session({
+app.use(sessions({
     secret: 'secret_key',
     resave: false,
     saveUninitialized: true
 }));
  
 app.get('/', function (req, res) {
-    res.sendFile(path.join(__dirname, 'public', 'index.html'))
+    if(req.session.username){
+        res.sendFile(path.join(__dirname, 'public', 'chat.html'))
+    }else{
+        res.sendFile(path.join(__dirname, 'public', 'loginn.html'))
+    }
+    
 });
+
+
+
+function Authenticator(req, res, next){
+    if(req.session.user){
+        return next();
+    }else{
+        res.status(401).send('unauthorized')
+    }
+}
+
 
 app.post('/login', (req, res) => {
     console.log(req.body.username, req.body.password)
     
     const {username, password} = req.body;
-
     if (username && password){
+    var user = users.find(u => u.username === username && u.password === password)
+    if(user){
+        console.log("rett inloggin")
         req.session.user = username;
+        session = req.session
+        session.username = req.body.username
         res.json({sucsess: true, username});
+        
     }else{
+        console.log("feil innlogging")
         res.status(401).json({sucsess: false, message: 'Invalid credentials'})
     }
+    }
+    
+    
 });
 
 
